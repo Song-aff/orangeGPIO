@@ -73,7 +73,7 @@ struct GpioRegister {
 
 #[napi]
 pub struct GpioControl {
-  gpio_register: &'static mut GpioRegister,
+  gpio_register: *mut u32,
   mem_fd: std::fs::File,
   gpio_map: memmap::MmapMut,
 }
@@ -100,32 +100,24 @@ impl GpioControl {
     };
     let gpio_addr =
       (gpio_map.as_ptr() as *mut u32 as u64 + (2 * PIO_ADDR_OFFSET + 0x00) as u64) as *mut u32;
-    let gpio_ptr: *mut GpioRegister = gpio_addr as *mut GpioRegister;
     GpioControl {
-      gpio_register: unsafe { &mut *gpio_ptr },
+      gpio_register: gpio_addr,
       mem_fd,
       gpio_map,
     }
   }
   #[napi]
-  pub fn info(&mut self) {
-    println!("gpio_register.address {:p}", self.gpio_register);
-    println!("gpio_register.cfg {}", self.gpio_register.cfg[0]);
-    println!("gpio_register.data {}", self.gpio_register.data);
-  }
-  #[napi]
   pub fn setMode(&mut self) {
-    println!("gpio_register.cfg{}", self.gpio_register.cfg[0]);
-    println!("gpio_register.cfg{:p}", &self.gpio_register.cfg);
-
-    self.gpio_register.cfg[0] &= 0x77777717;
-    self.gpio_register.cfg[1] &= 0x77777717;
+    unsafe {
+      *self.gpio_register.offset(0) &= 0x77777717;
+      *self.gpio_register.offset(1) &= 0x77777717;
+    }
   }
   #[napi]
   pub fn setVal(&mut self) {
-    println!("gpio_register.data{}", self.gpio_register.data);
-    println!("gpio_register.cfg{:p}", &self.gpio_register.data);
-    self.gpio_register.data = self.gpio_register.data ^ 0x00003000;
-    self.gpio_register.data = self.gpio_register.data ^ 0x00000002;
+    unsafe {
+      *self.gpio_register.offset(4) ^= 0x00003000;
+      *self.gpio_register.offset(4) ^= 0x00000002;
+    }
   }
 }
