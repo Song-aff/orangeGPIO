@@ -104,6 +104,12 @@ impl GpioControl {
     }
   }
   #[napi]
+  pub fn info(&mut self) {
+    println!("gpio_register.address {:p}", self.gpio_register);
+    println!("gpio_register.cfg {}", self.gpio_register.cfg[0]);
+    println!("gpio_register.data {}", self.gpio_register.data);
+  }
+  #[napi]
   pub fn setMode(&mut self) {
     println!("gpio_register.cfg{}", self.gpio_register.cfg[0]);
     self.gpio_register.cfg[0] &= 0x77777717;

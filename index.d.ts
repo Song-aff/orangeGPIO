@@ -14,6 +14,7 @@ export class Mmap {
 }
 export class GpioControl {
   constructor()
+  info(): void
   setMode(): void
   setVal(): void
 }
