@@ -74,6 +74,8 @@ struct GpioRegister {
 #[napi]
 pub struct GpioControl {
   gpio_register: &'static mut GpioRegister,
+  mem_fd: std::fs::File,
+  gpio_map: memmap::MmapMut,
 }
 
 #[napi]
@@ -101,6 +103,8 @@ impl GpioControl {
     let gpio_ptr: *mut GpioRegister = gpio_addr as *mut GpioRegister;
     GpioControl {
       gpio_register: unsafe { &mut *gpio_ptr },
+      mem_fd,
+      gpio_map,
     }
   }
   #[napi]
