@@ -3,7 +3,6 @@ use memmap::{MmapMut, MmapOptions};
 use std::fs::{File, OpenOptions};
 use std::thread;
 use std::time::Duration;
-
 #[macro_use]
 extern crate napi_derive;
 
@@ -63,4 +62,55 @@ impl Mmap {
 async fn async_add(num1: u32, num2: u32) -> u32 {
   thread::sleep(Duration::from_millis(1000));
   num1 + num2
+}
+
+struct GpioRegister {
+  cfg: [u32; 4],
+  data: u32,
+  drv: [u32; 2],
+  pul: [u32; 2],
+}
+
+#[napi]
+pub struct GpioControl {
+  gpio_register: &'static mut GpioRegister,
+}
+
+#[napi]
+impl GpioControl {
+  #[napi(constructor)]
+  pub fn new() -> Self {
+    const BLOCK_SIZE: usize = 4096; // 以4KB为块大小
+    const GPIO_BASE: u64 = 0x0300B000; // 假设使用的GPIO基地址为0x20000000
+    const PIO_ADDR_OFFSET: u32 = 0x0024;
+    // 打开/dev/mem并生成Mmap对象
+    let mem_fd = OpenOptions::new()
+      .read(true)
+      .write(true)
+      .open("/dev/mem")
+      .expect("Failed to open /dev/mem");
+    let gpio_map = unsafe {
+      MmapOptions::new()
+        .len(BLOCK_SIZE) // 映射的内存块大小为4KB
+        .offset(GPIO_BASE) // 指定映射到 GPIO 的地址
+        .map_mut(&mem_fd) // 以读写方式映射/dev/mem
+        .expect("Failed to map GPIO memory")
+    };
+    let gpio_addr =
+      (gpio_map.as_ptr() as *mut u32 as u64 + (2 * PIO_ADDR_OFFSET + 0x00) as u64) as *mut u32;
+    let gpio_ptr: *mut GpioRegister = gpio_addr as *mut GpioRegister;
+    GpioControl {
+      gpio_register: unsafe { &mut *gpio_ptr },
+    }
+  }
+  #[napi]
+  pub fn setMode(&mut self) {
+    self.gpio_register.cfg[0] &= 0x77777717;
+    self.gpio_register.cfg[1] &= 0x77777717;
+  }
+  #[napi]
+  pub fn setVal(&mut self) {
+    self.gpio_register.data = self.gpio_register.data ^ 0x00003000;
+    self.gpio_register.data = self.gpio_register.data ^ 0x00000002;
+  }
 }

@@ -252,8 +252,9 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { sum, Mmap, asyncAdd } = nativeBinding
+const { sum, Mmap, asyncAdd, GpioControl } = nativeBinding
 
 module.exports.sum = sum
 module.exports.Mmap = Mmap
 module.exports.asyncAdd = asyncAdd
+module.exports.GpioControl = GpioControl

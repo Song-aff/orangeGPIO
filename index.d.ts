@@ -12,3 +12,8 @@ export class Mmap {
   write(data: string): void
   read(): void
 }
+export class GpioControl {
+  constructor()
+  setMode(): void
+  setVal(): void
+}
