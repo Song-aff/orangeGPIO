@@ -31,5 +31,18 @@
     "test": "ava",
     "universal": "napi universal",
     "version": "napi version"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Song-aff/orangeGPIO.git"
+  },
+  "author": "songpengfei",
+  "bugs": {
+    "url": "https://github.com/Song-aff/orangeGPIO/issues"
+  },
+  "keywords": [
+    "copy",
+    "sync"
+  ],
+  "homepage": "https://github.com/Song-aff/orangeGPIO#readme"
 }
