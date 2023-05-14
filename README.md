@@ -4,7 +4,7 @@ OrangePi 的 NodeGPIO 支持
 
 ### example
 
-```
+```js
 import { OrangeGpio, ModeCode } from '../dist/core'
 const PC = new OrangeGpio('PC')
 PC.setMode(1, ModeCode.OutPut)
